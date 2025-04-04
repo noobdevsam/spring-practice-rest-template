@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class BeerClientImpl implements BeerClient {
@@ -26,6 +28,10 @@ public class BeerClientImpl implements BeerClient {
         // Make the API call and get the response
         // Get the response as a String and bound it to a ResponseEntity
         ResponseEntity<String> response = restTemplate.getForEntity(api_url, String.class);
+
+        // Get the response as a Map and bound it to a ResponseEntity
+        // Using Map to represent the JSON response which is good if we don't know the structure/values of the response
+        ResponseEntity<Map> map_response = restTemplate.getForEntity(api_url, Map.class);
 
         System.out.println(response.getBody());
 
