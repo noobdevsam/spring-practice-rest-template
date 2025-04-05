@@ -26,23 +26,6 @@ public class BeerClientImpl implements BeerClient {
         RestTemplate restTemplate = restTemplateBuilder.build();
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(GET_BEER_PATH);
 
-//        // Make the API call and get the response
-//        // Get the response as a String and bound it to a ResponseEntity
-//        ResponseEntity<String> response = restTemplate.getForEntity(BASE_URL + GET_BEER_PATH, String.class);
-//
-//        // Get the response as a Map and bound it to a ResponseEntity
-//        // Using Map to represent the JSON response which is good if we don't know the structure/values of the response
-//        ResponseEntity<Map> map_response = restTemplate.getForEntity(BASE_URL + GET_BEER_PATH, Map.class);
-//
-//        // Get the response as a JsonNode and bound it to a ResponseEntity
-//        ResponseEntity<JsonNode> json_response = restTemplate.getForEntity(BASE_URL + GET_BEER_PATH, JsonNode.class);
-//
-//        // Print a specific field from the JSON response
-//        Objects.requireNonNull(json_response.getBody()).findPath("content")
-//                .elements().forEachRemaining(node -> System.out.println(node.get("beerName").asText()));
-//
-//        System.out.println(response.getBody());
-
         // Get the response as a BeerDTOPageImpl and bound it to a ResponseEntity
         ResponseEntity<BeerDTOPageImpl> response = restTemplate.getForEntity(builder.toUriString(), BeerDTOPageImpl.class);
 
