@@ -2,7 +2,7 @@
 
 This project is a Spring Boot application that consumes a REST API.
 The REST API server used for this project is available
-at [spring-practice-data-rest](https://github.com/noobdevsam/spring-practice-data-rest).
+at [spring-practice-restmvc](https://github.com/noobdevsam/spring-practice-restmvc).
 
 ## Prerequisites
 
@@ -13,11 +13,11 @@ at [spring-practice-data-rest](https://github.com/noobdevsam/spring-practice-dat
 ## Run the REST API Server
 
 ```sh
-git clone https://github.com/noobdevsam/spring-practice-data-rest.git
+git clone https://github.com/noobdevsam/spring-practice-restmvc.git
 
-cd spring-practice-data-rest
+cd spring-practice-restmvc
 
-mvn clean install
+mvn clean package -DskipTests
 
-mvn spring-boot:run
+java -jar -Dspring.profiles.active=localdb target/spring-practice-restmvc-0.0.1-SNAPSHOT.jar
 ```
