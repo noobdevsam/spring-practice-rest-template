@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class BeerClientImpl implements BeerClient {
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = restTemplateBuilder.build();
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(GET_BEER_PATH);
 
 //        // Make the API call and get the response
 //        // Get the response as a String and bound it to a ResponseEntity
@@ -42,7 +44,7 @@ public class BeerClientImpl implements BeerClient {
 //        System.out.println(response.getBody());
 
         // Get the response as a BeerDTOPageImpl and bound it to a ResponseEntity
-        ResponseEntity<BeerDTOPageImpl> response = restTemplate.getForEntity(GET_BEER_PATH, BeerDTOPageImpl.class);
+        ResponseEntity<BeerDTOPageImpl> response = restTemplate.getForEntity(builder.toUriString(), BeerDTOPageImpl.class);
 
         return response.getBody();
     }
