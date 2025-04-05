@@ -16,7 +16,6 @@ public class BeerClientImpl implements BeerClient {
     private final RestTemplateBuilder restTemplateBuilder;
 
     // Define the URL for the API endpoint
-    private static final String BASE_URL = "http://localhost:9090";
     private static final String GET_BEER_PATH = "/api/v1/beer";
 
     @Override
@@ -43,7 +42,7 @@ public class BeerClientImpl implements BeerClient {
 //        System.out.println(response.getBody());
 
         // Get the response as a BeerDTOPageImpl and bound it to a ResponseEntity
-        ResponseEntity<BeerDTOPageImpl> response = restTemplate.getForEntity(BASE_URL + GET_BEER_PATH, BeerDTOPageImpl.class);
+        ResponseEntity<BeerDTOPageImpl> response = restTemplate.getForEntity(GET_BEER_PATH, BeerDTOPageImpl.class);
 
         return null;
     }
