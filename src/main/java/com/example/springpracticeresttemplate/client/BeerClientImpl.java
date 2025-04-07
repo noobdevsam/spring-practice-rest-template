@@ -6,9 +6,7 @@ import com.example.springpracticeresttemplate.model.BeerStyle;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
@@ -38,8 +36,8 @@ public class BeerClientImpl implements BeerClient {
     ) {
 
         // Create a RestTemplate instance
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(GET_BEER_PATH);
+        var restTemplate = restTemplateBuilder.build();
+        var builder = UriComponentsBuilder.fromPath(GET_BEER_PATH);
 
         if (beerName != null && !beerName.isEmpty()) {
             // Add the beer name as a query parameter if it's not null or empty
@@ -67,14 +65,14 @@ public class BeerClientImpl implements BeerClient {
         }
 
         // Get the response as a BeerDTOPageImpl and bound it to a ResponseEntity
-        ResponseEntity<BeerDTOPageImpl> response = restTemplate.getForEntity(builder.toUriString(), BeerDTOPageImpl.class);
+        var response = restTemplate.getForEntity(builder.toUriString(), BeerDTOPageImpl.class);
 
         return response.getBody();
     }
 
     @Override
     public BeerDTO getBeerById(UUID beerId) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
+        var restTemplate = restTemplateBuilder.build();
         return restTemplate.getForObject(GET_BEER_BY_ID_PATH, BeerDTO.class, beerId);
     }
 
