@@ -88,4 +88,9 @@ public class BeerClientImpl implements BeerClient {
         log.debug("Beer updated at location: {}", GET_BEER_BY_ID_PATH);
         return getBeerById(beerDTO.getId());
     }
+
+    @Override
+    public void deleteBeerById(UUID beerId) {
+        restTemplate.delete(GET_BEER_BY_ID_PATH, beerId);
+    }
 }
