@@ -4,17 +4,17 @@ import com.example.springpracticeresttemplate.model.BeerDTO;
 import com.example.springpracticeresttemplate.model.BeerDTOPageImpl;
 import com.example.springpracticeresttemplate.model.BeerStyle;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BeerClientImpl implements BeerClient {
 
     private final RestTemplateBuilder restTemplateBuilder;
@@ -38,8 +38,8 @@ public class BeerClientImpl implements BeerClient {
     ) {
 
         // Create a RestTemplate instance
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(GET_BEER_PATH);
+        var restTemplate = restTemplateBuilder.build();
+        var builder = UriComponentsBuilder.fromPath(GET_BEER_PATH);
 
         if (beerName != null && !beerName.isEmpty()) {
             // Add the beer name as a query parameter if it's not null or empty
@@ -67,21 +67,23 @@ public class BeerClientImpl implements BeerClient {
         }
 
         // Get the response as a BeerDTOPageImpl and bound it to a ResponseEntity
-        ResponseEntity<BeerDTOPageImpl> response = restTemplate.getForEntity(builder.toUriString(), BeerDTOPageImpl.class);
+        var response = restTemplate.getForEntity(builder.toUriString(), BeerDTOPageImpl.class);
 
         return response.getBody();
     }
 
     @Override
     public BeerDTO getBeerById(UUID beerId) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
+        var restTemplate = restTemplateBuilder.build();
         return restTemplate.getForObject(GET_BEER_BY_ID_PATH, BeerDTO.class, beerId);
     }
 
     @Override
     public BeerDTO createBeer(BeerDTO newBeerDTO) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<BeerDTO> response = restTemplate.postForEntity(GET_BEER_PATH, newBeerDTO, BeerDTO.class);
-        return null;
+        var restTemplate = restTemplateBuilder.build();
+        var uri = restTemplate.postForLocation(GET_BEER_PATH, newBeerDTO);
+        assert uri != null;
+        log.info("Beer created at location: {}", uri.getPath());
+        return restTemplate.getForObject(uri.getPath(), BeerDTO.class);
     }
 }
