@@ -4,6 +4,7 @@ import com.example.springpracticeresttemplate.model.BeerDTO;
 import com.example.springpracticeresttemplate.model.BeerDTOPageImpl;
 import com.example.springpracticeresttemplate.model.BeerStyle;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BeerClientImpl implements BeerClient {
 
     private final RestTemplateBuilder restTemplateBuilder;
@@ -81,6 +83,7 @@ public class BeerClientImpl implements BeerClient {
         var restTemplate = restTemplateBuilder.build();
         var uri = restTemplate.postForLocation(GET_BEER_PATH, newBeerDTO);
         assert uri != null;
+        log.info("Beer created at location: {}", uri.getPath());
         return restTemplate.getForObject(uri.getPath(), BeerDTO.class);
     }
 }

@@ -54,9 +54,8 @@ class BeerClientImplTest {
                 .quantityOnHand(100)
                 .build();
 
-        //var savedBeerDTO = beerClient.createBeer(beerDTO);
-        //System.out.println("New record id: " + savedBeerDTO.getId());
-        //assertNotNull(savedBeerDTO);
+        var savedBeerDTO = beerClient.createBeer(beerDTO);
+        assertNotNull(savedBeerDTO);
 
     }
 }
