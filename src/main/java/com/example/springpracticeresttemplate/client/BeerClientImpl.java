@@ -86,4 +86,12 @@ public class BeerClientImpl implements BeerClient {
         log.info("Beer created at location: {}", uri.getPath());
         return restTemplate.getForObject(uri.getPath(), BeerDTO.class);
     }
+
+    @Override
+    public BeerDTO updateBeer(BeerDTO beerDTO) {
+        var restTemplate = restTemplateBuilder.build();
+        restTemplate.put(GET_BEER_BY_ID_PATH, beerDTO, beerDTO.getId());
+        log.debug("Beer updated at location: {}", GET_BEER_BY_ID_PATH);
+        return getBeerById(beerDTO.getId());
+    }
 }
