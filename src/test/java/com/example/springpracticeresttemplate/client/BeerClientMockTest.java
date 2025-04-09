@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withAccepted;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RestClientTest
@@ -94,6 +96,34 @@ class BeerClientMockTest {
                 );
 
         var responseDto = beerClient.getBeerById(dto.getId());
+        assertThat(responseDto.getId()).isEqualTo(dto.getId());
+    }
+
+    @Test
+    void test_create() throws JsonProcessingException {
+        var dto = getBeerDTO();
+        var response = objectMapper.writeValueAsString(dto);
+        var uri = UriComponentsBuilder.fromPath(BeerClientImpl.GET_BEER_BY_ID_PATH)
+                .build(dto.getId());
+
+        mockRestServiceServer
+                .expect(method(HttpMethod.POST))
+                .andExpect(
+                        requestTo(base_url + BeerClientImpl.GET_BEER_PATH)
+                ).andRespond(
+                        withAccepted().location(uri)
+                );
+
+        mockRestServiceServer
+                .expect(method(HttpMethod.GET))
+                .andExpect(
+                        requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
+                                dto.getId())
+                ).andRespond(
+                        withSuccess(response, MediaType.APPLICATION_JSON)
+                );
+
+        var responseDto = beerClient.createBeer(dto);
         assertThat(responseDto.getId()).isEqualTo(dto.getId());
     }
 
