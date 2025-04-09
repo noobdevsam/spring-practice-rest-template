@@ -26,8 +26,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withAccepted;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 @RestClientTest
 @Import(RestTemplateConfig.class)
@@ -91,14 +90,7 @@ class BeerClientMockTest {
     @Test
     void test_get_by_id() {
 
-        mockRestServiceServer
-                .expect(method(HttpMethod.GET))
-                .andExpect(
-                        requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
-                                dto.getId())
-                ).andRespond(
-                        withSuccess(dtoJson, MediaType.APPLICATION_JSON)
-                );
+        mockGetOperation();
 
         var responseDto = beerClient.getBeerById(dto.getId());
         assertThat(responseDto.getId()).isEqualTo(dto.getId());
@@ -117,6 +109,30 @@ class BeerClientMockTest {
                         withAccepted().location(uri)
                 );
 
+        mockGetOperation();
+
+        var responseDto = beerClient.createBeer(dto);
+        assertThat(responseDto.getId()).isEqualTo(dto.getId());
+    }
+
+    @Test
+    void test_update_beer() {
+        mockRestServiceServer
+                .expect(method(HttpMethod.PUT))
+                .andExpect(
+                        requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
+                                dto.getId())
+                ).andRespond(
+                        withNoContent()
+                );
+
+        mockGetOperation();
+
+        var responseDto = beerClient.updateBeer(dto);
+        assertThat(responseDto.getId()).isEqualTo(dto.getId());
+    }
+
+    private void mockGetOperation() {
         mockRestServiceServer
                 .expect(method(HttpMethod.GET))
                 .andExpect(
@@ -125,9 +141,6 @@ class BeerClientMockTest {
                 ).andRespond(
                         withSuccess(dtoJson, MediaType.APPLICATION_JSON)
                 );
-
-        var responseDto = beerClient.createBeer(dto);
-        assertThat(responseDto.getId()).isEqualTo(dto.getId());
     }
 
     BeerDTOPageImpl getPage() {
