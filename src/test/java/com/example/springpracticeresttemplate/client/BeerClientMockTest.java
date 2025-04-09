@@ -6,9 +6,13 @@ import com.example.springpracticeresttemplate.model.BeerDTOPageImpl;
 import com.example.springpracticeresttemplate.model.BeerStyle;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
@@ -20,25 +24,48 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@RestClientTest(BeerClientImpl.class)
+@RestClientTest
 @Import(RestTemplateConfig.class)
 class BeerClientMockTest {
 
     static final String base_url = "http://localhost:9090";
 
-    @Autowired
     BeerClient beerClient;
 
-    @Autowired
     MockRestServiceServer mockRestServiceServer;
 
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    RestTemplateBuilder restTemplateBuilderConfigured;
+
+    @Mock
+    RestTemplateBuilder mockRestTemplateBuilder = new RestTemplateBuilder(
+            new MockServerRestTemplateCustomizer()
+    );
+
+    @BeforeEach
+    void setUp() {
+        var restTemplate = restTemplateBuilderConfigured.build();
+        mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build();
+
+        when(
+                mockRestTemplateBuilder.build()
+        ).thenReturn(
+                restTemplate
+        );
+
+        beerClient = new BeerClientImpl(restTemplate);
+
+        // The setup method initializes the MockRestServiceServer and the BeerClient
+        // with a RestTemplate that is configured to use the mock server.
+    }
 
     @Test
     void test_list_beers() throws JsonProcessingException {
