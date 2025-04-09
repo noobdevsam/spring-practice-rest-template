@@ -25,8 +25,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RestClientTest
@@ -78,6 +77,24 @@ class BeerClientMockTest {
         Page<BeerDTO> dtos = beerClient.listBeers();
 
         assertThat(dtos.getContent().size()).isGreaterThan(0);
+    }
+
+    @Test
+    void test_get_by_id() throws JsonProcessingException {
+        var dto = getBeerDTO();
+        var response = objectMapper.writeValueAsString(dto);
+
+        mockRestServiceServer
+                .expect(method(HttpMethod.GET))
+                .andExpect(
+                        requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
+                                dto.getId())
+                ).andRespond(
+                        withSuccess(response, MediaType.APPLICATION_JSON)
+                );
+
+        var responseDto = beerClient.getBeerById(dto.getId());
+        assertThat(responseDto.getId()).isEqualTo(dto.getId());
     }
 
     BeerDTOPageImpl getPage() {
