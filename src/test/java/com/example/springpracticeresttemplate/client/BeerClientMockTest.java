@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -46,13 +45,16 @@ class BeerClientMockTest {
     @Autowired
     RestTemplateBuilder restTemplateBuilderConfigured;
 
+    BeerDTO dto;
+    String dtoJson;
+
     @Mock
     RestTemplateBuilder mockRestTemplateBuilder = new RestTemplateBuilder(
             new MockServerRestTemplateCustomizer()
     );
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         var restTemplate = restTemplateBuilderConfigured.build();
         mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build();
 
@@ -64,27 +66,30 @@ class BeerClientMockTest {
 
         beerClient = new BeerClientImpl(restTemplate);
 
-        // The setup method initializes the MockRestServiceServer and the BeerClient
-        // with a RestTemplate that is configured to use the mock server.
+        dto = getBeerDTO();
+        dtoJson = objectMapper.writeValueAsString(dto);
+
     }
 
     @Test
     void test_list_beers() throws JsonProcessingException {
         String payload = objectMapper.writeValueAsString(getPage());
 
-        mockRestServiceServer.expect(method(HttpMethod.GET))
-                .andExpect(requestTo(base_url + BeerClientImpl.GET_BEER_PATH))
-                .andRespond(withSuccess(payload, MediaType.APPLICATION_JSON));
+        mockRestServiceServer
+                .expect(method(HttpMethod.GET))
+                .andExpect(
+                        requestTo(base_url + BeerClientImpl.GET_BEER_PATH)
+                ).andRespond(
+                        withSuccess(payload, MediaType.APPLICATION_JSON)
+                );
 
-        Page<BeerDTO> dtos = beerClient.listBeers();
+        var dtos = beerClient.listBeers();
 
         assertThat(dtos.getContent().size()).isGreaterThan(0);
     }
 
     @Test
-    void test_get_by_id() throws JsonProcessingException {
-        var dto = getBeerDTO();
-        var response = objectMapper.writeValueAsString(dto);
+    void test_get_by_id() {
 
         mockRestServiceServer
                 .expect(method(HttpMethod.GET))
@@ -92,7 +97,7 @@ class BeerClientMockTest {
                         requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
                                 dto.getId())
                 ).andRespond(
-                        withSuccess(response, MediaType.APPLICATION_JSON)
+                        withSuccess(dtoJson, MediaType.APPLICATION_JSON)
                 );
 
         var responseDto = beerClient.getBeerById(dto.getId());
@@ -100,9 +105,7 @@ class BeerClientMockTest {
     }
 
     @Test
-    void test_create() throws JsonProcessingException {
-        var dto = getBeerDTO();
-        var response = objectMapper.writeValueAsString(dto);
+    void test_create_beer() {
         var uri = UriComponentsBuilder.fromPath(BeerClientImpl.GET_BEER_BY_ID_PATH)
                 .build(dto.getId());
 
@@ -120,7 +123,7 @@ class BeerClientMockTest {
                         requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
                                 dto.getId())
                 ).andRespond(
-                        withSuccess(response, MediaType.APPLICATION_JSON)
+                        withSuccess(dtoJson, MediaType.APPLICATION_JSON)
                 );
 
         var responseDto = beerClient.createBeer(dto);
