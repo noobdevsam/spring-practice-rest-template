@@ -168,6 +168,30 @@ class BeerClientMockTest {
         mockRestServiceServer.verify(); // Verify that the DELETE request was made
     }
 
+    @Test
+    void test_list_beers_query_param() throws JsonProcessingException {
+        var response = objectMapper.writeValueAsString(getPage());
+        var uri = UriComponentsBuilder
+                .fromUriString(base_url + BeerClientImpl.GET_BEER_PATH)
+                .queryParam("beerName", "ALE")
+                .build().toUri();
+
+        mockRestServiceServer
+                .expect(method(HttpMethod.GET))
+                .andExpect(
+                        requestTo(uri)
+                ).andExpect(
+                        queryParam("beerName", "ALE")
+                ).andRespond(
+                        withSuccess(response, MediaType.APPLICATION_JSON)
+                );
+
+        var response_page = beerClient
+                .listBeers("ALE", null, null, null, null);
+
+        assertThat(response_page.getContent().size()).isEqualTo(1);
+    }
+
     private void mockGetOperation() {
         mockRestServiceServer
                 .expect(method(HttpMethod.GET))
