@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
@@ -144,6 +146,24 @@ class BeerClientMockTest {
                 );
 
         beerClient.deleteBeerById(dto.getId());
+
+        mockRestServiceServer.verify(); // Verify that the DELETE request was made
+    }
+
+    @Test
+    void test_delete_beer_not_found() {
+        mockRestServiceServer
+                .expect(method(HttpMethod.DELETE))
+                .andExpect(
+                        requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
+                                dto.getId())
+                ).andRespond(
+                        withResourceNotFound()
+                );
+
+        assertThrows(
+                HttpClientErrorException.class, () -> beerClient.deleteBeerById(dto.getId())
+        );
 
         mockRestServiceServer.verify(); // Verify that the DELETE request was made
     }
