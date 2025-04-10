@@ -132,6 +132,22 @@ class BeerClientMockTest {
         assertThat(responseDto.getId()).isEqualTo(dto.getId());
     }
 
+    @Test
+    void test_delete_beer() {
+        mockRestServiceServer
+                .expect(method(HttpMethod.DELETE))
+                .andExpect(
+                        requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
+                                dto.getId())
+                ).andRespond(
+                        withNoContent()
+                );
+
+        beerClient.deleteBeerById(dto.getId());
+
+        mockRestServiceServer.verify(); // Verify that the DELETE request was made
+    }
+
     private void mockGetOperation() {
         mockRestServiceServer
                 .expect(method(HttpMethod.GET))
