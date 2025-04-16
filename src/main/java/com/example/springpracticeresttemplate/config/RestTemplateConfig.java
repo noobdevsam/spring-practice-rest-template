@@ -14,12 +14,6 @@ public class RestTemplateConfig {
     @Value("${rest.template-base-url}")
     String baseUrl;
 
-    @Value("${rest.template.username}")
-    String username;
-
-    @Value("${rest.template.password}")
-    String password;
-
     @Bean
     RestTemplateBuilder restTemplateBuilder(RestTemplateBuilderConfigurer configurer) {
 
@@ -28,8 +22,7 @@ public class RestTemplateConfig {
         // use https://github.com/noobdevsam/spring-practice-restmvc/tree/81-security-complete-mvc-tests as rest server
         // and run the server on port 9090 as this application connects to port 9090 for the rest server
 
-        return configurer.configure(new RestTemplateBuilder()).
-                basicAuthentication(username, password)
+        return configurer.configure(new RestTemplateBuilder())
                 .uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl));
     }
 
