@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -35,6 +36,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 class BeerClientMockTest {
 
     static final String base_url = "http://localhost:9090";
+    public static final RequestMatcher BASIC_AUTHORIZATION_HEADER = header("Authorization", "Basic dXNlcjpwYXNzd29yZA==");
 
     BeerClient beerClient;
 
@@ -107,6 +109,8 @@ class BeerClientMockTest {
                 .expect(method(HttpMethod.POST))
                 .andExpect(
                         requestTo(base_url + BeerClientImpl.GET_BEER_PATH)
+                ).andExpect(
+                        BASIC_AUTHORIZATION_HEADER
                 ).andRespond(
                         withAccepted().location(uri)
                 );
@@ -124,6 +128,8 @@ class BeerClientMockTest {
                 .andExpect(
                         requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
                                 dto.getId())
+                ).andExpect(
+                        BASIC_AUTHORIZATION_HEADER
                 ).andRespond(
                         withNoContent()
                 );
@@ -141,6 +147,8 @@ class BeerClientMockTest {
                 .andExpect(
                         requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
                                 dto.getId())
+                ).andExpect(
+                        BASIC_AUTHORIZATION_HEADER
                 ).andRespond(
                         withNoContent()
                 );
@@ -157,6 +165,8 @@ class BeerClientMockTest {
                 .andExpect(
                         requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
                                 dto.getId())
+                ).andExpect(
+                        BASIC_AUTHORIZATION_HEADER
                 ).andRespond(
                         withResourceNotFound()
                 );
@@ -181,6 +191,8 @@ class BeerClientMockTest {
                 .andExpect(
                         requestTo(uri)
                 ).andExpect(
+                        BASIC_AUTHORIZATION_HEADER
+                ).andExpect(
                         queryParam("beerName", "ALE")
                 ).andRespond(
                         withSuccess(response, MediaType.APPLICATION_JSON)
@@ -198,6 +210,8 @@ class BeerClientMockTest {
                 .andExpect(
                         requestToUriTemplate(base_url + BeerClientImpl.GET_BEER_BY_ID_PATH,
                                 dto.getId())
+                ).andExpect(
+                        BASIC_AUTHORIZATION_HEADER
                 ).andRespond(
                         withSuccess(dtoJson, MediaType.APPLICATION_JSON)
                 );
