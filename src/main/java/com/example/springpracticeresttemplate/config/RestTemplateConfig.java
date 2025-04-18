@@ -19,17 +19,11 @@ public class RestTemplateConfig {
     @Value("${rest.template-base-url}")
     String baseUrl;
 
-    private final ClientRegistrationRepository clientRegistrationRepository;
-    private final OAuth2AuthorizedClientService authorizedClientService;
-
-    public RestTemplateConfig(ClientRegistrationRepository clientRegistrationRepository,
-                              OAuth2AuthorizedClientService authorizedClientService) {
-        this.clientRegistrationRepository = clientRegistrationRepository;
-        this.authorizedClientService = authorizedClientService;
-    }
-
     @Bean
-    RestTemplateBuilder restTemplateBuilder(RestTemplateBuilderConfigurer configurer) {
+    RestTemplateBuilder restTemplateBuilder(
+            RestTemplateBuilderConfigurer configurer,
+            OauthClientInterceptor interceptor
+    ) {
 
         assert baseUrl != null;
 
@@ -37,6 +31,7 @@ public class RestTemplateConfig {
         // and run the server on port 9090 as this application connects to port 9090 for the rest server
 
         return configurer.configure(new RestTemplateBuilder())
+                .additionalInterceptors(interceptor)
                 .uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl));
     }
 
@@ -51,7 +46,10 @@ public class RestTemplateConfig {
      * This setup ensures that the application can manage OAuth2 client credentials securely and efficiently.
      */
     @Bean
-    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager() {
+    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager(
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2AuthorizedClientService authorizedClientService
+    ) {
 
         // An OAuth2AuthorizedClientProvider is created using the OAuth2AuthorizedClientProviderBuilder.
         // The builder is configured to support the clientCredentials grant type.
