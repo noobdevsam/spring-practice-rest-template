@@ -10,6 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -23,13 +25,11 @@ import static java.util.Objects.isNull;
 // -
 // The class ensures that every HTTP request made by the RestTemplate includes a valid OAuth2 Bearer token for
 // authentication. It uses the OAuth2AuthorizedClientManager to handle the token retrieval and management process.
+@Component
 public class OauthClientInterceptor implements ClientHttpRequestInterceptor {
 
     // OAuth2AuthorizedClientManager: Manages the authorization of OAuth2 clients.
     private final OAuth2AuthorizedClientManager manager;
-
-    // Authentication: Represents the principal (user or client) making the request.
-    private final Authentication principal;
 
     // ClientRegistration: Contains the configuration for the OAuth2 client (e.g., client ID, client secret, etc.).
     private final ClientRegistration clientRegistration;
@@ -38,12 +38,14 @@ public class OauthClientInterceptor implements ClientHttpRequestInterceptor {
     // which are required for authorizing the client and obtaining an access token.
     public OauthClientInterceptor(
             OAuth2AuthorizedClientManager manager,
-            Authentication principal,
-            ClientRegistration clientRegistration
+            ClientRegistrationRepository clientRegistrationRepository
     ) {
         this.manager = manager;
-        this.principal = principal;
-        this.clientRegistration = clientRegistration;
+
+        // Authentication: Represents the principal (user or client) making the request.
+        var _ = createPrincipal();
+        // The clientRegistration is obtained from the ClientRegistrationRepository using the registration ID "springauth".
+        this.clientRegistration = clientRegistrationRepository.findByRegistrationId("springauth");
     }
 
 
@@ -58,7 +60,7 @@ public class OauthClientInterceptor implements ClientHttpRequestInterceptor {
         // It creates an OAuth2AuthorizeRequest using the clientRegistration and a custom Authentication object
         // (created by the createPrincipal method).
         var authorizeRequest = OAuth2AuthorizeRequest
-                .withClientRegistrationId(clientRegistration.getClientId())
+                .withClientRegistrationId(clientRegistration.getRegistrationId())
                 .principal(createPrincipal())
                 .build();
 
