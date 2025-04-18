@@ -1,5 +1,6 @@
 package com.example.springpracticeresttemplate.client;
 
+import com.example.springpracticeresttemplate.config.OauthClientInterceptor;
 import com.example.springpracticeresttemplate.config.RestTemplateConfig;
 import com.example.springpracticeresttemplate.model.BeerDTO;
 import com.example.springpracticeresttemplate.model.BeerDTOPageImpl;
@@ -11,11 +12,21 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.web.client.HttpClientErrorException;
@@ -48,8 +59,43 @@ class BeerClientMockTest {
     @Autowired
     RestTemplateBuilder restTemplateBuilderConfigured;
 
+    @Autowired
+    ClientRegistrationRepository clientRegistrationRepository;
+
     BeerDTO dto;
     String dtoJson;
+    @MockitoBean
+    OAuth2AuthorizedClientManager manager;
+
+    @TestConfiguration
+    public static class TestConfig {
+
+        @Bean
+        ClientRegistrationRepository clientRegistrationRepository() {
+            return new InMemoryClientRegistrationRepository(
+                    ClientRegistration.withRegistrationId("springauth")
+                            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                            .clientId("test")
+                            .tokenUri("test")
+                            .build()
+            );
+        }
+
+        @Bean
+        OAuth2AuthorizedClientService auth2AuthorizedClientService(
+                ClientRegistrationRepository clientRegistrationRepository
+        ) {
+            return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository);
+        }
+
+        @Bean
+        OauthClientInterceptor oauthClientInterceptor(
+                OAuth2AuthorizedClientManager manager,
+                ClientRegistrationRepository clientRegistrationRepository
+        ) {
+            return new OauthClientInterceptor(manager, clientRegistrationRepository);
+        }
+    }
 
     @Mock
     RestTemplateBuilder mockRestTemplateBuilder = new RestTemplateBuilder(
