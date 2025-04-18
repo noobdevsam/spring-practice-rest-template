@@ -20,12 +20,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
@@ -33,11 +35,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
@@ -47,7 +51,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 class BeerClientMockTest {
 
     static final String base_url = "http://localhost:9090";
-    public static final RequestMatcher BASIC_AUTHORIZATION_HEADER = header("Authorization", "Basic dXNlcjpwYXNzd29yZA==");
+    public static final RequestMatcher BASIC_AUTHORIZATION_HEADER = header("Authorization", "Bearer test");
 
     BeerClient beerClient;
 
@@ -64,6 +68,7 @@ class BeerClientMockTest {
 
     BeerDTO dto;
     String dtoJson;
+
     @MockitoBean
     OAuth2AuthorizedClientManager manager;
 
@@ -104,6 +109,21 @@ class BeerClientMockTest {
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
+
+        var clientRegistration = clientRegistrationRepository.findByRegistrationId("springauth");
+        var token = new OAuth2AccessToken(
+                OAuth2AccessToken.TokenType.BEARER,
+                "test",
+                Instant.MIN,
+                Instant.MAX
+        );
+
+        when(
+                manager.authorize(any())
+        ).thenReturn(
+                new OAuth2AuthorizedClient(clientRegistration, "test", token)
+        );
+
         var restTemplate = restTemplateBuilderConfigured.build();
         mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build();
 
