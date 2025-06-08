@@ -26,5 +26,10 @@ spring:
                         token-uri: http://localhost:9000/oauth2/token
 
 rest:
-    template-base-url: http://localhost:9090
+    template-base-url: http://localhost:8081
 
+logging:
+    level:
+        org:
+            zalando:
+                logbook: trace
